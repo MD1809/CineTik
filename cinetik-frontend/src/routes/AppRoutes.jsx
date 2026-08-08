@@ -16,6 +16,8 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import MyTicketsPage from '../pages/MyTicketsPage';
 import StaffCheckinPage from '../pages/StaffCheckinPage';
+import AdminMoviesPage from '../pages/AdminMoviesPage';
+import AdminRoomsPage from '../pages/AdminRoomsPage';
 
 export default function AppRoutes() {
   return (
@@ -54,6 +56,18 @@ export default function AppRoutes() {
           }
         >
           <Route path="/staff/checkin" element={<StaffCheckinPage />} />
+        </Route>
+
+        {/* Admin Protected Routes wrapped in AdminLayout */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/admin/movies" element={<AdminMoviesPage />} />
+          <Route path="/admin/rooms" element={<AdminRoomsPage />} />
         </Route>
 
         {/* Catch-all fallback */}
