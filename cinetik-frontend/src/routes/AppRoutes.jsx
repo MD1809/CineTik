@@ -18,6 +18,7 @@ import MyTicketsPage from '../pages/MyTicketsPage';
 import StaffCheckinPage from '../pages/StaffCheckinPage';
 import AdminMoviesPage from '../pages/AdminMoviesPage';
 import AdminRoomsPage from '../pages/AdminRoomsPage';
+import AdminShowtimesPage from '../pages/AdminShowtimesPage';
 
 export default function AppRoutes() {
   return (
@@ -68,6 +69,7 @@ export default function AppRoutes() {
         >
           <Route path="/admin/movies" element={<AdminMoviesPage />} />
           <Route path="/admin/rooms" element={<AdminRoomsPage />} />
+          <Route path="/admin/showtimes" element={<AdminShowtimesPage />} />
         </Route>
 
         {/* Catch-all fallback */}

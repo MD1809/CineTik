@@ -42,4 +42,23 @@ export const adminService = {
     const response = await apiClient.put(`/admin/rooms/seats/${seatId}`, { loaiGhe });
     return response.data.data;
   },
+
+  // Showtimes & Pricing Management
+  getAllShowtimes: async (movieId, date) => {
+    const params = {};
+    if (movieId) params.movieId = movieId;
+    if (date) params.date = date;
+    const response = await apiClient.get('/public/showtimes', { params });
+    return response.data.data;
+  },
+
+  createShowtime: async (showtimeData) => {
+    const response = await apiClient.post('/admin/showtimes', showtimeData);
+    return response.data.data;
+  },
+
+  updateShowtime: async (id, showtimeData) => {
+    const response = await apiClient.put(`/admin/showtimes/${id}`, showtimeData);
+    return response.data.data;
+  },
 };
