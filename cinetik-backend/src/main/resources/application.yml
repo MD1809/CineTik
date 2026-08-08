@@ -1,0 +1,65 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: cinetik-backend
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/cinetik_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      timeout: 2000ms
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SPRING_MAIL_USERNAME:cinetik.cinema@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:dummy_app_password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# Security JWT Settings
+jwt:
+  secret: ${JWT_SECRET:CineTikSuperSecretKeyForJWTAuthentication2026SecureKey789012}
+  expiration: 86400000 # 24 hours in milliseconds
+
+# VNPay Payment Gateway Configuration
+vnpay:
+  tmn-code: ${VNP_TMN_CODE:MOCK_TMN_CODE}
+  hash-secret: ${VNP_HASH_SECRET:MOCK_HASH_SECRET}
+  pay-url: ${VNP_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+  return-url: ${VNP_RETURN_URL:http://localhost:8080/api/v1/payments/vnpay-return}
+  version: "2.1.0"
+  command: "pay"
+  curr-code: "VND"
+  locale: "vn"
+  sandbox-mock-enabled: ${VNP_MOCK_ENABLED:true}
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.cinetik: DEBUG
+    org.hibernate.SQL: DEBUG

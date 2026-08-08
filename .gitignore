@@ -1,0 +1,24 @@
+# AI Agent / Project Documentation
+.agents/
+docs/
+
+# Java / Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
