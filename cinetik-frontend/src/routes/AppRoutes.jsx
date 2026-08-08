@@ -15,6 +15,7 @@ import PaymentResultPage from '../pages/PaymentResultPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import MyTicketsPage from '../pages/MyTicketsPage';
+import StaffCheckinPage from '../pages/StaffCheckinPage';
 
 export default function AppRoutes() {
   return (
@@ -42,6 +43,17 @@ export default function AppRoutes() {
               </ProtectedRoute>
             }
           />
+        </Route>
+
+        {/* Staff Protected Routes wrapped in StaffLayout */}
+        <Route
+          element={
+            <ProtectedRoute allowedRoles={['STAFF', 'ADMIN']}>
+              <StaffLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/staff/checkin" element={<StaffCheckinPage />} />
         </Route>
 
         {/* Catch-all fallback */}
