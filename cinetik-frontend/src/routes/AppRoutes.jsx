@@ -12,6 +12,9 @@ import BookingSeatPage from '../pages/BookingSeatPage';
 import CheckoutPage from '../pages/CheckoutPage';
 import VNPayMockPage from '../pages/VNPayMockPage';
 import PaymentResultPage from '../pages/PaymentResultPage';
+import LoginPage from '../pages/LoginPage';
+import RegisterPage from '../pages/RegisterPage';
+import MyTicketsPage from '../pages/MyTicketsPage';
 
 export default function AppRoutes() {
   return (
@@ -27,6 +30,18 @@ export default function AppRoutes() {
           <Route path="/booking/checkout" element={<CheckoutPage />} />
           <Route path="/payments/vnpay/mock-pay-page" element={<VNPayMockPage />} />
           <Route path="/payment/result" element={<PaymentResultPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          
+          {/* Customer Protected Route */}
+          <Route
+            path="/my-tickets"
+            element={
+              <ProtectedRoute>
+                <MyTicketsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Catch-all fallback */}
