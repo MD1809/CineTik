@@ -4,6 +4,7 @@ import com.cinetik.common.dto.ApiResponse;
 import com.cinetik.dto.CalculatePriceRequest;
 import com.cinetik.dto.CalculatePriceResponse;
 import com.cinetik.dto.ShowtimeResponse;
+import com.cinetik.service.SeatLockService;
 import com.cinetik.service.ShowtimeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.List;
 public class PublicShowtimeController {
 
     private final ShowtimeService showtimeService;
+    private final SeatLockService seatLockService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ShowtimeResponse>>> getPublicShowtimes(
@@ -32,6 +34,12 @@ public class PublicShowtimeController {
     public ResponseEntity<ApiResponse<ShowtimeResponse>> getShowtimeById(@PathVariable Long id) {
         ShowtimeResponse showtime = showtimeService.getShowtimeById(id);
         return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết suất chiếu thành công", showtime));
+    }
+
+    @GetMapping("/{id}/locked-seats")
+    public ResponseEntity<ApiResponse<List<Long>>> getLockedSeats(@PathVariable Long id) {
+        List<Long> lockedSeatIds = seatLockService.getLockedSeatsForShowtime(id);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ghế đang bị giữ chỗ thành công", lockedSeatIds));
     }
 
     @PostMapping("/calculate-price")
