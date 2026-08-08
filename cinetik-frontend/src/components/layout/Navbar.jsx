@@ -45,14 +45,14 @@ const Navbar = () => {
               </Link>
             )}
 
-            {user?.role === 'ROLE_ADMIN' && (
-              <Link to="/admin" className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors flex items-center space-x-1 bg-amber-950/50 border border-amber-800/60 px-3 py-1.5 rounded-lg">
+            {(user?.role === 'ADMIN' || user?.role === 'ROLE_ADMIN') && (
+              <Link to="/admin/movies" className="text-sm font-medium text-amber-400 hover:text-amber-300 transition-colors flex items-center space-x-1 bg-amber-950/50 border border-amber-800/60 px-3 py-1.5 rounded-lg">
                 <ShieldAlert className="w-4 h-4" />
                 <span>Quản trị Admin</span>
               </Link>
             )}
 
-            {user?.role === 'ROLE_STAFF' && (
+            {(user?.role === 'STAFF' || user?.role === 'ROLE_STAFF') && (
               <Link to="/staff/checkin" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors flex items-center space-x-1 bg-emerald-950/50 border border-emerald-800/60 px-3 py-1.5 rounded-lg">
                 <CheckSquare className="w-4 h-4" />
                 <span>Soát vé Check-in</span>
@@ -168,9 +168,9 @@ const Navbar = () => {
               >
                 Vé của tôi
               </Link>
-              {user.role === 'ROLE_ADMIN' && (
+              {(user.role === 'ADMIN' || user.role === 'ROLE_ADMIN') && (
                 <Link
-                  to="/admin"
+                  to="/admin/movies"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block px-3 py-2 rounded-md text-base font-medium text-amber-400 hover:bg-slate-800"
                 >

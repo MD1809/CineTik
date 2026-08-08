@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,8 +25,23 @@ export default function LoginPage() {
     try {
       setIsSubmitting(true);
       setError(null);
-      await login(email, password);
-      navigate(from, { replace: true });
+      const result = await login(email, password);
+      if (result.success && result.user) {
+        if (from) {
+          navigate(from, { replace: true });
+        } else {
+          const role = result.user.role;
+          if (role === 'ADMIN' || role === 'ROLE_ADMIN') {
+            navigate('/admin/movies', { replace: true });
+          } else if (role === 'STAFF' || role === 'ROLE_STAFF') {
+            navigate('/staff/checkin', { replace: true });
+          } else {
+            navigate('/', { replace: true });
+          }
+        }
+      } else {
+        setError(result.message || 'Email hoặc mật khẩu không chính xác.');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError(err.response?.data?.message || 'Email hoặc mật khẩu không chính xác.');

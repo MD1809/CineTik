@@ -1,5 +1,6 @@
 package com.cinetik.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -18,5 +19,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "Mật khẩu không được để trống")
+    @JsonAlias({"password", "matKhau"})
     private String matKhau;
 }

@@ -16,12 +16,15 @@ export const AuthProvider = ({ children }) => {
       if (storedToken && storedUser) {
         try {
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          const parsed = JSON.parse(storedUser);
+          setUser({ ...parsed, role: parsed.role || parsed.vaiTro });
           // Verify with backend me endpoint
           const response = await apiClient.get('/auth/me');
           if (response.data && response.data.data) {
-            setUser(response.data.data);
-            localStorage.setItem('cinetik_user', JSON.stringify(response.data.data));
+            const meData = response.data.data;
+            const formattedMe = { ...meData, role: meData.role || meData.vaiTro };
+            setUser(formattedMe);
+            localStorage.setItem('cinetik_user', JSON.stringify(formattedMe));
           }
         } catch (error) {
           console.error('Session verification failed:', error);
@@ -37,9 +40,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await apiClient.post('/auth/login', { email, password });
-      const data = response.data.data; // LoginResponse (token, user)
-      const jwtToken = data.token;
-      const userInfo = data.user;
+      const data = response.data.data; // AuthResponse (accessToken, user)
+      const jwtToken = data?.accessToken || data?.token;
+      const rawUser = data?.user;
+      const userInfo = rawUser ? { ...rawUser, role: rawUser.role || rawUser.vaiTro } : null;
 
       setToken(jwtToken);
       setUser(userInfo);
