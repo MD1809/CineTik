@@ -15,4 +15,6 @@ public interface ShowtimeRepository extends JpaRepository<Showtime, Long> {
     List<Showtime> findByNgayChieu(LocalDate ngayChieu);
 
     List<Showtime> findByMovieIdAndNgayChieu(Long movieId, LocalDate ngayChieu);
+
+    List<Showtime> findByCinemaRoomIdAndNgayChieu(Long cinemaRoomId, LocalDate ngayChieu);
 }
