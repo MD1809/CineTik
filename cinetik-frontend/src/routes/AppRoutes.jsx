@@ -8,6 +8,7 @@ import ProtectedRoute from './ProtectedRoute';
 
 import HomePage from '../pages/HomePage';
 import MovieDetailPage from '../pages/MovieDetailPage';
+import BookingSeatPage from '../pages/BookingSeatPage';
 
 export default function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function AppRoutes() {
           <Route path="/movies" element={<HomePage />} />
           <Route path="/movies/:id" element={<MovieDetailPage />} />
           <Route path="/showtimes" element={<HomePage />} />
+          <Route path="/booking/showtime/:showtimeId" element={<BookingSeatPage />} />
         </Route>
 
         {/* Catch-all fallback */}
