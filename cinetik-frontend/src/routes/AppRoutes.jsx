@@ -10,6 +10,8 @@ import HomePage from '../pages/HomePage';
 import MovieDetailPage from '../pages/MovieDetailPage';
 import BookingSeatPage from '../pages/BookingSeatPage';
 import CheckoutPage from '../pages/CheckoutPage';
+import VNPayMockPage from '../pages/VNPayMockPage';
+import PaymentResultPage from '../pages/PaymentResultPage';
 
 export default function AppRoutes() {
   return (
@@ -23,6 +25,8 @@ export default function AppRoutes() {
           <Route path="/showtimes" element={<HomePage />} />
           <Route path="/booking/showtime/:showtimeId" element={<BookingSeatPage />} />
           <Route path="/booking/checkout" element={<CheckoutPage />} />
+          <Route path="/payments/vnpay/mock-pay-page" element={<VNPayMockPage />} />
+          <Route path="/payment/result" element={<PaymentResultPage />} />
         </Route>
 
         {/* Catch-all fallback */}
