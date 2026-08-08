@@ -19,6 +19,9 @@ import StaffCheckinPage from '../pages/StaffCheckinPage';
 import AdminMoviesPage from '../pages/AdminMoviesPage';
 import AdminRoomsPage from '../pages/AdminRoomsPage';
 import AdminShowtimesPage from '../pages/AdminShowtimesPage';
+import AdminFBPage from '../pages/AdminFBPage';
+import AdminStaffPage from '../pages/AdminStaffPage';
+import AdminReportsPage from '../pages/AdminReportsPage';
 
 export default function AppRoutes() {
   return (
@@ -70,6 +73,9 @@ export default function AppRoutes() {
           <Route path="/admin/movies" element={<AdminMoviesPage />} />
           <Route path="/admin/rooms" element={<AdminRoomsPage />} />
           <Route path="/admin/showtimes" element={<AdminShowtimesPage />} />
+          <Route path="/admin/fb-items" element={<AdminFBPage />} />
+          <Route path="/admin/staff" element={<AdminStaffPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
         </Route>
 
         {/* Catch-all fallback */}

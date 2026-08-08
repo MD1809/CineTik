@@ -61,4 +61,71 @@ export const adminService = {
     const response = await apiClient.put(`/admin/showtimes/${id}`, showtimeData);
     return response.data.data;
   },
+
+  // F&B Management
+  getAllFBItems: async () => {
+    const response = await apiClient.get('/admin/fb-items');
+    return response.data.data;
+  },
+
+  createFBItem: async (fbData) => {
+    const response = await apiClient.post('/admin/fb-items', fbData);
+    return response.data.data;
+  },
+
+  updateFBItem: async (id, fbData) => {
+    const response = await apiClient.put(`/admin/fb-items/${id}`, fbData);
+    return response.data.data;
+  },
+
+  deleteFBItem: async (id) => {
+    const response = await apiClient.delete(`/admin/fb-items/${id}`);
+    return response.data.data;
+  },
+
+  // Staff Management
+  getAllStaff: async () => {
+    const response = await apiClient.get('/admin/staff');
+    return response.data.data;
+  },
+
+  createStaff: async (staffData) => {
+    const response = await apiClient.post('/admin/staff', staffData);
+    return response.data.data;
+  },
+
+  updateStaffStatus: async (id, trangThaiAcc) => {
+    const response = await apiClient.put(`/admin/staff/${id}/status`, { trangThaiAcc });
+    return response.data.data;
+  },
+
+  resetStaffPassword: async (id, matKhauMoi) => {
+    const response = await apiClient.put(`/admin/staff/${id}/reset-password`, { matKhauMoi });
+    return response.data.data;
+  },
+
+  // Reports & Analytics
+  getRevenueReport: async (startDate, endDate) => {
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const response = await apiClient.get('/admin/reports/revenue', { params });
+    return response.data.data;
+  },
+
+  getMovieSalesReport: async (startDate, endDate) => {
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const response = await apiClient.get('/admin/reports/movies', { params });
+    return response.data.data;
+  },
+
+  getFBSalesReport: async (startDate, endDate) => {
+    const params = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    const response = await apiClient.get('/admin/reports/fb-items', { params });
+    return response.data.data;
+  },
 };
