@@ -20,4 +20,14 @@ export const bookingService = {
     const response = await apiClient.post('/bookings/lock-seats', { showtimeId, seatIds });
     return response.data.data;
   },
+
+  createBooking: async (bookingData) => {
+    const response = await apiClient.post('/bookings', bookingData);
+    return response.data.data;
+  },
+
+  getMyTickets: async () => {
+    const response = await apiClient.get('/bookings/my-tickets');
+    return response.data.data;
+  },
 };
