@@ -9,6 +9,7 @@ import com.cinetik.entity.BookingDetailSeat;
 import com.cinetik.entity.PaymentStatus;
 import com.cinetik.repository.BookingDetailSeatRepository;
 import com.cinetik.repository.BookingRepository;
+import com.cinetik.service.EmailService;
 import com.cinetik.service.SeatLockService;
 import com.cinetik.service.VNPayService;
 import com.cinetik.util.VNPayUtils;
@@ -33,6 +34,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final BookingRepository bookingRepository;
     private final BookingDetailSeatRepository bookingDetailSeatRepository;
     private final SeatLockService seatLockService;
+    private final EmailService emailService;
 
     @Override
     public VNPayPaymentResponse createPaymentUrl(VNPayPaymentRequest request, HttpServletRequest servletRequest) {
@@ -139,6 +141,8 @@ public class VNPayServiceImpl implements VNPayService {
             bookingRepository.save(booking);
 
             releaseBookingSeats(booking);
+            emailService.sendBookingConfirmationEmail(booking);
+
             return VNPayCallbackResponse.builder()
                     .ticketCode(ticketCode)
                     .responseCode(responseCode)
@@ -172,6 +176,8 @@ public class VNPayServiceImpl implements VNPayService {
             bookingRepository.save(booking);
 
             releaseBookingSeats(booking);
+            emailService.sendBookingConfirmationEmail(booking);
+
             return VNPayCallbackResponse.builder()
                     .ticketCode(ticketCode)
                     .responseCode("00")
