@@ -10,7 +10,7 @@ export default function HomePage() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('NOW_SHOWING'); // NOW_SHOWING or COMING_SOON
+  const [activeTab, setActiveTab] = useState('DANG_CHIEU'); // DANG_CHIEU or SAP_CHIEU
   const [selectedGenre, setSelectedGenre] = useState('Tất cả');
 
   // Trailer modal state
@@ -116,9 +116,9 @@ export default function HomePage() {
           {/* Status Tabs */}
           <div className="flex items-center space-x-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
             <button
-              onClick={() => setActiveTab('NOW_SHOWING')}
+              onClick={() => setActiveTab('DANG_CHIEU')}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === 'NOW_SHOWING'
+                activeTab === 'DANG_CHIEU'
                   ? 'bg-rose-600 text-white shadow-lg shadow-rose-950/50'
                   : 'text-slate-400 hover:text-white'
               }`}
@@ -126,9 +126,9 @@ export default function HomePage() {
               Phim Đang Chiếu
             </button>
             <button
-              onClick={() => setActiveTab('COMING_SOON')}
+              onClick={() => setActiveTab('SAP_CHIEU')}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === 'COMING_SOON'
+                activeTab === 'SAP_CHIEU'
                   ? 'bg-rose-600 text-white shadow-lg shadow-rose-950/50'
                   : 'text-slate-400 hover:text-white'
               }`}
