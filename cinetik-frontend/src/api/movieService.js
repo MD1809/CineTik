@@ -15,7 +15,7 @@ export const movieService = {
   },
 
   getShowtimesByMovie: async (movieId) => {
-    const response = await apiClient.get(`/public/showtimes/movie/${movieId}`);
+    const response = await apiClient.get('/public/showtimes', { params: { movieId } });
     return response.data.data;
   },
 };
