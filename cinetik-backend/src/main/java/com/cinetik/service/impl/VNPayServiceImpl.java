@@ -46,7 +46,7 @@ public class VNPayServiceImpl implements VNPayService {
         }
 
         if (vnPayProperties.isSandboxMockEnabled()) {
-            String mockUrl = String.format("http://localhost:8080/api/v1/payments/vnpay/mock-pay-page?vnp_TxnRef=%s&vnp_Amount=%d",
+            String mockUrl = String.format("http://localhost:5173/payments/vnpay/mock-pay-page?vnp_TxnRef=%s&vnp_Amount=%d",
                     booking.getTicketCode(), booking.getTongTien().longValue());
             return VNPayPaymentResponse.builder()
                     .paymentUrl(mockUrl)
