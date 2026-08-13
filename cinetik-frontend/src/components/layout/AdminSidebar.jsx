@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Film, Calendar, DoorOpen, Coffee, Users, BarChart3, LayoutDashboard, Shield } from 'lucide-react';
+import { Film, Calendar, DoorOpen, Coffee, Users, BarChart3, Tag, Shield } from 'lucide-react';
 
 const AdminSidebar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   const location = useLocation();
@@ -8,7 +8,8 @@ const AdminSidebar = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   const menuItems = [
     { path: '/admin/movies', label: 'Quản lý Phim', icon: Film },
     { path: '/admin/rooms', label: 'Quản lý Phòng chiếu & Ghế', icon: DoorOpen },
-    { path: '/admin/showtimes', label: 'Quản lý Lịch chiếu & Phụ thu', icon: Calendar },
+    { path: '/admin/showtimes', label: 'Quản lý Lịch chiếu', icon: Calendar },
+    { path: '/admin/pricing-rules', label: 'Quản lý Bảng Giá & Phụ Thu', icon: Tag },
     { path: '/admin/fb-items', label: 'Quản lý Combo F&B', icon: Coffee },
     { path: '/admin/staff', label: 'Quản lý Nhân viên Staff', icon: Users },
     { path: '/admin/reports', label: 'Báo cáo Doanh thu', icon: BarChart3 },

@@ -22,7 +22,6 @@ export default function AdminShowtimesPage() {
     movieId: '',
     roomId: '',
     thoiGianBatDau: '',
-    phuThu: 0,
   });
 
   useEffect(() => {
@@ -70,7 +69,6 @@ export default function AdminShowtimesPage() {
       movieId: movies.length > 0 ? movies[0].id : '',
       roomId: rooms.length > 0 ? rooms[0].id : '',
       thoiGianBatDau: defaultDateTime,
-      phuThu: 10000,
     });
     setModalOpen(true);
   };
@@ -84,7 +82,6 @@ export default function AdminShowtimesPage() {
       movieId: showtime.movie?.id || '',
       roomId: showtime.cinemaRoom?.id || '',
       thoiGianBatDau: dt,
-      phuThu: showtime.phuThu || 0,
     });
     setModalOpen(true);
   };
@@ -104,7 +101,6 @@ export default function AdminShowtimesPage() {
         roomId: Number(formData.roomId),
         ngayChieu: ngayChieu,
         thoiGianBatDau: formData.thoiGianBatDau,
-        bangGiaSetting: JSON.stringify({ phuThu: Number(formData.phuThu) }),
       };
 
       if (editingShowtime) {
@@ -123,6 +119,17 @@ export default function AdminShowtimesPage() {
     }
   };
 
+  const handleDeleteShowtime = async (id) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa suất chiếu này?')) return;
+    try {
+      await adminService.deleteShowtime(id);
+      fetchShowtimes();
+    } catch (err) {
+      console.error('Error deleting showtime:', err);
+      alert('Không thể xóa suất chiếu.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -132,22 +139,22 @@ export default function AdminShowtimesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header & Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-        <div className="flex items-center space-x-3">
-          <div className="p-3 bg-rose-950/80 border border-rose-800 text-rose-500 rounded-2xl">
-            <Calendar className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-extrabold text-white">Quản Lý Lịch Chiếu & Phụ Thu Vé</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Xếp lịch chiếu cho các phòng và cài đặt giá vé linh hoạt theo giờ chiếu</p>
-          </div>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
+        <div>
+          <h1 className="text-2xl font-extrabold text-white flex items-center space-x-3">
+            <Calendar className="w-7 h-7 text-rose-500" />
+            <span>Quản Lý Lịch Chiếu</span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">
+            Tạo suất chiếu mới và tự động áp dụng bảng giá, phụ thu & giảm giá động
+          </p>
         </div>
 
         <button
           onClick={handleOpenAddModal}
-          className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-rose-950/60 transition flex items-center space-x-2 shrink-0 hover:scale-105"
+          className="inline-flex items-center justify-center space-x-2 px-5 py-3 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-2xl shadow-lg shadow-rose-950/60 transition hover:scale-[1.02] shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Tạo Suất Chiếu Mới</span>
@@ -162,10 +169,10 @@ export default function AdminShowtimesPage() {
       )}
 
       {/* Filters Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center gap-4 text-xs">
+      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-wrap items-center gap-4 text-xs">
         <div className="flex items-center space-x-2">
           <Film className="w-4 h-4 text-rose-500" />
-          <span className="font-semibold text-slate-300">Lọc theo phim:</span>
+          <span className="font-semibold text-slate-300">Lọc theo Phim:</span>
           <select
             value={selectedMovieFilter}
             onChange={(e) => setSelectedMovieFilter(e.target.value)}
@@ -202,13 +209,14 @@ export default function AdminShowtimesPage() {
                 <th className="p-4">Phòng Chiếu</th>
                 <th className="p-4">Thời Gian Bắt Đầu</th>
                 <th className="p-4">Phụ Thu Suất Chiếu</th>
+                <th className="p-4">Giá Giảm Suất Chiếu</th>
                 <th className="p-4 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {showtimes.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">
+                  <td colSpan={6} className="p-8 text-center text-slate-500">
                     Chưa có lịch chiếu nào khớp với bộ lọc.
                   </td>
                 </tr>
@@ -228,15 +236,44 @@ export default function AdminShowtimesPage() {
                         <span>{st.thoiGianBatDau}</span>
                       </div>
                     </td>
+                    {/* Column: Surcharges (Money & Name) */}
                     <td className="p-4">
-                      <span className="font-extrabold text-amber-400">
-                        +{(st.phuThu || 0).toLocaleString('vi-VN')} VNĐ
-                      </span>
+                      {st.appliedSurcharges && st.appliedSurcharges.length > 0 ? (
+                        <div className="space-y-1">
+                          {st.appliedSurcharges.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-amber-950/70 border border-amber-800/60 text-amber-400 text-xs font-bold"
+                            >
+                              <span>{item.formattedDisplay}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-slate-500 italic text-xs">Không có</span>
+                      )}
                     </td>
-                    <td className="p-4 text-right">
+                    {/* Column: Discounts (Money/% & Name) */}
+                    <td className="p-4">
+                      {st.appliedDiscounts && st.appliedDiscounts.length > 0 ? (
+                        <div className="space-y-1">
+                          {st.appliedDiscounts.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-xs font-bold"
+                            >
+                              <span>{item.formattedDisplay}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-slate-500 italic text-xs">Không có</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right space-x-2">
                       <button
                         onClick={() => handleOpenEditModal(st)}
-                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition"
+                        className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition cursor-pointer"
                         title="Sửa lịch chiếu"
                       >
                         <Edit className="w-4 h-4" />
@@ -310,16 +347,9 @@ export default function AdminShowtimesPage() {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="font-semibold text-slate-300">Phụ Thu Suất Chiếu (VNĐ)</label>
-                <input
-                  type="number"
-                  step="5000"
-                  value={formData.phuThu}
-                  onChange={(e) => setFormData({ ...formData, phuThu: Number(e.target.value) })}
-                  placeholder="VD: 10000 hoặc 20000"
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-rose-500"
-                />
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                <div className="font-bold text-rose-400">💡 Tự Động Áp Dụng Bảng Giá & Phụ Thu:</div>
+                <div>Giá vé, phụ thu giờ cao điểm và giảm giá khuyến mãi sẽ được hệ thống tính tự động dựa trên khung giờ & loại ngày mà bạn đã cấu hình tại trang Quản lý Bảng Giá.</div>
               </div>
 
               <div className="pt-4 flex justify-end space-x-3 border-t border-slate-800">

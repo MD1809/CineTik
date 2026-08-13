@@ -27,6 +27,7 @@ public class DataSeeder implements CommandLineRunner {
     private final MovieRepository movieRepository;
     private final ShowtimeRepository showtimeRepository;
     private final FBItemRepository fbItemRepository;
+    private final PricingRuleRepository pricingRuleRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -38,6 +39,7 @@ public class DataSeeder implements CommandLineRunner {
             seedShowtimes(room, movies);
         }
         seedFBItems();
+        seedPricingRules();
         log.info("CineTik DataSeeder completed successfully!");
     }
 
@@ -221,6 +223,46 @@ public class DataSeeder implements CommandLineRunner {
 
             fbItemRepository.saveAll(List.of(item1, item2, item3));
             log.info("Seeded 3 F&B Combo items");
+        }
+    }
+
+    private void seedPricingRules() {
+        if (pricingRuleRepository.count() == 0) {
+            PricingRule r1 = PricingRule.builder()
+                    .tenQuyTac("Phụ thu Giờ Cao Điểm Tối")
+                    .loaiDieuChinh(AdjustmentType.SURCHARGE)
+                    .hinhThuc(DiscountType.FIXED_AMOUNT)
+                    .giaTri(new BigDecimal("15000"))
+                    .loaiNgay(DayType.ALL)
+                    .gioBatDau(LocalTime.of(18, 0))
+                    .gioKetThuc(LocalTime.of(22, 0))
+                    .trangThai(true)
+                    .build();
+
+            PricingRule r2 = PricingRule.builder()
+                    .tenQuyTac("Phụ thu Cuối tuần (T7, CN)")
+                    .loaiDieuChinh(AdjustmentType.SURCHARGE)
+                    .hinhThuc(DiscountType.FIXED_AMOUNT)
+                    .giaTri(new BigDecimal("10000"))
+                    .loaiNgay(DayType.WEEKEND)
+                    .gioBatDau(null)
+                    .gioKetThuc(null)
+                    .trangThai(true)
+                    .build();
+
+            PricingRule r3 = PricingRule.builder()
+                    .tenQuyTac("Giảm giá Suất Chiếu Sớm")
+                    .loaiDieuChinh(AdjustmentType.DISCOUNT)
+                    .hinhThuc(DiscountType.PERCENTAGE)
+                    .giaTri(new BigDecimal("10"))
+                    .loaiNgay(DayType.ALL)
+                    .gioBatDau(LocalTime.of(8, 0))
+                    .gioKetThuc(LocalTime.of(11, 30))
+                    .trangThai(true)
+                    .build();
+
+            pricingRuleRepository.saveAll(List.of(r1, r2, r3));
+            log.info("Seeded 3 Default Pricing Rules");
         }
     }
 }

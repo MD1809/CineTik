@@ -128,4 +128,25 @@ export const adminService = {
     const response = await apiClient.get('/admin/reports/fb-items', { params });
     return response.data.data;
   },
+
+  // Dynamic Pricing & Surcharges / Discounts Management
+  getAllPricingRules: async () => {
+    const response = await apiClient.get('/admin/pricing-rules');
+    return response.data.data;
+  },
+
+  createPricingRule: async (ruleData) => {
+    const response = await apiClient.post('/admin/pricing-rules', ruleData);
+    return response.data.data;
+  },
+
+  updatePricingRule: async (id, ruleData) => {
+    const response = await apiClient.put(`/admin/pricing-rules/${id}`, ruleData);
+    return response.data.data;
+  },
+
+  deletePricingRule: async (id) => {
+    const response = await apiClient.delete(`/admin/pricing-rules/${id}`);
+    return response.data.data;
+  },
 };

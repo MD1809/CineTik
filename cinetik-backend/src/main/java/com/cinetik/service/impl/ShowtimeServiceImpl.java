@@ -165,6 +165,8 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 .thoiGianBatDau(showtime.getThoiGianBatDau())
                 .thoiGianKetThuc(showtime.getThoiGianKetThuc())
                 .bangGiaSetting(showtime.getBangGiaSetting())
+                .appliedSurcharges(pricingEngineService.getAppliedSurcharges(showtime))
+                .appliedDiscounts(pricingEngineService.getAppliedDiscounts(showtime))
                 .build();
     }
 }

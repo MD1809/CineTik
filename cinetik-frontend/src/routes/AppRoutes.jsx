@@ -22,6 +22,7 @@ import AdminShowtimesPage from '../pages/AdminShowtimesPage';
 import AdminFBPage from '../pages/AdminFBPage';
 import AdminStaffPage from '../pages/AdminStaffPage';
 import AdminReportsPage from '../pages/AdminReportsPage';
+import AdminPricingRulesPage from '../pages/AdminPricingRulesPage';
 
 export default function AppRoutes() {
   return (
@@ -73,6 +74,7 @@ export default function AppRoutes() {
           <Route path="/admin/movies" element={<AdminMoviesPage />} />
           <Route path="/admin/rooms" element={<AdminRoomsPage />} />
           <Route path="/admin/showtimes" element={<AdminShowtimesPage />} />
+          <Route path="/admin/pricing-rules" element={<AdminPricingRulesPage />} />
           <Route path="/admin/fb-items" element={<AdminFBPage />} />
           <Route path="/admin/staff" element={<AdminStaffPage />} />
           <Route path="/admin/reports" element={<AdminReportsPage />} />

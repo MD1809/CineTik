@@ -53,18 +53,37 @@ export default function BookingSeatPage() {
     });
   };
 
+  const [priceCalculation, setPriceCalculation] = useState(null);
+
+  useEffect(() => {
+    if (showtime && selectedSeats.length > 0) {
+      fetchPriceCalculation();
+    } else {
+      setPriceCalculation(null);
+    }
+  }, [selectedSeats, showtime]);
+
+  const fetchPriceCalculation = async () => {
+    try {
+      const seatIds = selectedSeats.map((s) => s.id);
+      const calcRes = await bookingService.calculatePrice(showtime.id, seatIds);
+      setPriceCalculation(calcRes);
+    } catch (err) {
+      console.error('Error calculating price:', err);
+    }
+  };
+
   const calculateTotalPrice = () => {
+    if (priceCalculation && priceCalculation.tongTien !== undefined) {
+      return priceCalculation.tongTien;
+    }
     if (!showtime) return 0;
-    // Calculate total price based on seat type base + showtime surcharges
     let total = 0;
     selectedSeats.forEach((seat) => {
       let basePrice = 80000;
       if (seat.loaiGhe === 'VIP') basePrice = 100000;
       if (seat.loaiGhe === 'COUPLE') basePrice = 150000;
-
-      // Surcharge from showtime
-      const surcharge = showtime.phuThu || 0;
-      total += basePrice + surcharge;
+      total += basePrice;
     });
     return total;
   };
@@ -205,6 +224,27 @@ export default function BookingSeatPage() {
                 </div>
               )}
             </div>
+
+            {/* Applied Pricing Adjustments (Surcharges & Discounts) */}
+            {priceCalculation && priceCalculation.appliedAdjustments && priceCalculation.appliedAdjustments.length > 0 && (
+              <div className="pt-3 border-t border-slate-800/80 space-y-2 text-xs">
+                <div className="font-semibold text-slate-400">Các khoản Phụ thu / Giảm giá:</div>
+                <div className="space-y-1.5 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  {priceCalculation.appliedAdjustments.map((adj, idx) => {
+                    const isSurcharge = adj.loaiDieuChinh === 'SURCHARGE';
+                    return (
+                      <div key={idx} className="flex justify-between items-center text-xs">
+                        <span className="text-slate-300 font-medium">{adj.tenQuyTac}</span>
+                        <span className={`font-bold ${isSurcharge ? 'text-amber-400' : 'text-emerald-400'}`}>
+                          {isSurcharge ? '+' : ''}
+                          {Number(adj.soTien).toLocaleString('vi-VN')} VNĐ/vé
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Price Total */}
             <div className="pt-4 border-t border-slate-800 flex items-center justify-between">

@@ -11,8 +11,8 @@ export const bookingService = {
     return response.data.data;
   },
 
-  calculatePrice: async (showtimeId, seatId) => {
-    const response = await apiClient.post('/public/showtimes/calculate-price', { showtimeId, seatId });
+  calculatePrice: async (showtimeId, seatIds) => {
+    const response = await apiClient.post('/public/showtimes/calculate-price', { showtimeId, seatIds });
     return response.data.data;
   },
 
