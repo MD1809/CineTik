@@ -40,9 +40,35 @@ export default function AdminPricingRulesPage() {
     trangThai: true,
   });
 
+  const [seatPrices, setSeatPrices] = useState([]);
+  const [savingSeatPriceId, setSavingSeatPriceId] = useState(null);
+
   useEffect(() => {
     fetchRules();
+    fetchSeatPrices();
   }, []);
+
+  const fetchSeatPrices = async () => {
+    try {
+      const data = await adminService.getAllSeatPrices();
+      setSeatPrices(data || []);
+    } catch (err) {
+      console.error('Error fetching seat prices:', err);
+    }
+  };
+
+  const handleUpdateSeatPrice = async (seatPriceItem) => {
+    try {
+      setSavingSeatPriceId(seatPriceItem.id);
+      await adminService.updateSeatPrice(seatPriceItem.id, Number(seatPriceItem.giaGoc));
+      alert(`Đã cập nhật giá gốc cho ${seatPriceItem.tenLoaiGhe} thành công!`);
+    } catch (err) {
+      console.error('Error updating seat price:', err);
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật giá gốc ghế.');
+    } finally {
+      setSavingSeatPriceId(null);
+    }
+  };
 
   const fetchRules = async () => {
     try {
@@ -195,8 +221,90 @@ export default function AdminPricingRulesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
+        <div className="space-y-1">
+          <div className="inline-flex items-center space-x-2 bg-rose-950/80 border border-rose-800/60 text-rose-400 font-bold px-3 py-1 rounded-full text-xs">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>DYNAMIC PRICING SEAT</span>
+          </div>
+          <h1 className="text-2xl font-extrabold text-white flex items-center space-x-3">
+            <Tag className="w-7 h-7 text-rose-500" />
+            <span>Quản Lý Bảng Gía loại Ghế Ngồi</span>
+          </h1>
+          <p className="text-xs text-slate-400">
+            Tùy chỉnh linh hoạt giá ghế theo từng loại chỗ ngồi.
+          </p>
+        </div>
+      </div>
+
+      {/* Base Seat Prices Config Section */}
+      <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/80 pb-3 gap-2">
+          <div className="flex items-center space-x-2">
+            <DollarSign className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-base font-extrabold text-white">Bảng Giá Gốc Mặc Định Cho Từng Loại Ghế</h2>
+          </div>
+          <span className="text-xs text-slate-400">
+            Giá cơ sở ban đầu trước khi tính Phụ thu giờ cao điểm & Giảm giá khuyến mãi
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {seatPrices.map((sp) => {
+            const isSingle = sp.loaiGhe === 'SINGLE';
+            const isVip = sp.loaiGhe === 'VIP';
+            const icon = isSingle ? '🎟️' : isVip ? '👑' : '💖';
+            const badgeColor = isSingle
+              ? 'border-blue-800/60 bg-blue-950/40 text-blue-300'
+              : isVip
+                ? 'border-amber-800/60 bg-amber-950/40 text-amber-300'
+                : 'border-pink-800/60 bg-pink-950/40 text-pink-300';
+
+            return (
+              <div key={sp.id} className={`p-4 rounded-2xl border ${badgeColor} space-y-3 shadow-inner`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-sm text-white flex items-center space-x-2">
+                    <span className="text-base">{icon}</span>
+                    <span>{sp.tenLoaiGhe}</span>
+                  </span>
+                  <span className="text-[10px] font-mono font-bold uppercase bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-400">
+                    {sp.loaiGhe}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-300 font-semibold">Giá gốc (VNĐ):</label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="number"
+                      step="1000"
+                      min="0"
+                      value={sp.giaGoc}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSeatPrices((prev) =>
+                          prev.map((item) => (item.id === sp.id ? { ...item, giaGoc: val } : item))
+                        );
+                      }}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white font-mono font-bold text-sm focus:outline-none focus:border-rose-500"
+                    />
+                    <button
+                      onClick={() => handleUpdateSeatPrice(sp)}
+                      disabled={savingSeatPriceId === sp.id}
+                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow cursor-pointer shrink-0"
+                    >
+                      {savingSeatPriceId === sp.id ? '...' : 'Lưu'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl mt-[100px]">
         <div className="space-y-1">
           <div className="inline-flex items-center space-x-2 bg-rose-950/80 border border-rose-800/60 text-rose-400 font-bold px-3 py-1 rounded-full text-xs">
             <Sparkles className="w-3.5 h-3.5" />
@@ -219,37 +327,33 @@ export default function AdminPricingRulesPage() {
           <span>Thêm Quy Tắc Mới</span>
         </button>
       </div>
-
       {/* Filter Tabs */}
       <div className="flex items-center space-x-2 border-b border-slate-800 pb-2">
         <button
           onClick={() => setFilterType('ALL')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-            filterType === 'ALL'
-              ? 'bg-rose-600 text-white'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition ${filterType === 'ALL'
+            ? 'bg-rose-600 text-white'
+            : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            }`}
         >
           Tất cả ({rules.length})
         </button>
         <button
           onClick={() => setFilterType('SURCHARGE')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 ${
-            filterType === 'SURCHARGE'
-              ? 'bg-amber-600 text-white'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 ${filterType === 'SURCHARGE'
+            ? 'bg-amber-600 text-white'
+            : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            }`}
         >
           <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
           <span>Phụ Thu ({rules.filter((r) => r.loaiDieuChinh === 'SURCHARGE').length})</span>
         </button>
         <button
           onClick={() => setFilterType('DISCOUNT')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 ${
-            filterType === 'DISCOUNT'
-              ? 'bg-emerald-600 text-white'
-              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 ${filterType === 'DISCOUNT'
+            ? 'bg-emerald-600 text-white'
+            : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+            }`}
         >
           <TrendingDown className="w-3.5 h-3.5 text-emerald-400" />
           <span>Giảm Giá ({rules.filter((r) => r.loaiDieuChinh === 'DISCOUNT').length})</span>
@@ -278,19 +382,17 @@ export default function AdminPricingRulesPage() {
             return (
               <div
                 key={rule.id}
-                className={`bg-slate-900 border rounded-3xl p-6 flex flex-col justify-between space-y-5 shadow-xl transition-all hover:border-slate-700 ${
-                  rule.trangThai ? 'border-slate-800' : 'border-slate-800/40 opacity-60'
-                }`}
+                className={`bg-slate-900 border rounded-3xl p-6 flex flex-col justify-between space-y-5 shadow-xl transition-all hover:border-slate-700 ${rule.trangThai ? 'border-slate-800' : 'border-slate-800/40 opacity-60'
+                  }`}
               >
                 <div className="space-y-4">
                   {/* Top Badge Row */}
                   <div className="flex items-center justify-between">
                     <span
-                      className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase ${
-                        isSurcharge
-                          ? 'bg-amber-950/80 border border-amber-800/80 text-amber-400'
-                          : 'bg-emerald-950/80 border border-emerald-800/80 text-emerald-400'
-                      }`}
+                      className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase ${isSurcharge
+                        ? 'bg-amber-950/80 border border-amber-800/80 text-amber-400'
+                        : 'bg-emerald-950/80 border border-emerald-800/80 text-emerald-400'
+                        }`}
                     >
                       {isSurcharge ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                       <span>{isSurcharge ? 'Phụ thu' : 'Giảm giá'}</span>
@@ -299,11 +401,10 @@ export default function AdminPricingRulesPage() {
                     {/* Status Toggle Switch */}
                     <button
                       onClick={() => handleToggleStatus(rule)}
-                      className={`px-3 py-1 rounded-full text-[11px] font-bold border transition ${
-                        rule.trangThai
-                          ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400'
-                          : 'bg-slate-800 border-slate-700 text-slate-400'
-                      }`}
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold border transition ${rule.trangThai
+                        ? 'bg-emerald-950/40 border-emerald-800 text-emerald-400'
+                        : 'bg-slate-800 border-slate-700 text-slate-400'
+                        }`}
                     >
                       {rule.trangThai ? 'Đang bật' : 'Đã tắt'}
                     </button>
@@ -316,9 +417,8 @@ export default function AdminPricingRulesPage() {
                   <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 flex items-center justify-between">
                     <span className="text-xs text-slate-400 font-medium">Mức điều chỉnh:</span>
                     <span
-                      className={`text-xl font-extrabold font-mono ${
-                        isSurcharge ? 'text-amber-400' : 'text-emerald-400'
-                      }`}
+                      className={`text-xl font-extrabold font-mono ${isSurcharge ? 'text-amber-400' : 'text-emerald-400'
+                        }`}
                     >
                       {isSurcharge ? '+' : '-'}
                       {isPercentage

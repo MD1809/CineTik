@@ -149,4 +149,15 @@ export const adminService = {
     const response = await apiClient.delete(`/admin/pricing-rules/${id}`);
     return response.data.data;
   },
+
+  // Base Seat Price Config Management
+  getAllSeatPrices: async () => {
+    const response = await apiClient.get('/admin/seat-prices');
+    return response.data.data;
+  },
+
+  updateSeatPrice: async (id, giaGoc) => {
+    const response = await apiClient.put(`/admin/seat-prices/${id}`, { giaGoc });
+    return response.data.data;
+  },
 };

@@ -28,6 +28,7 @@ public class DataSeeder implements CommandLineRunner {
     private final ShowtimeRepository showtimeRepository;
     private final FBItemRepository fbItemRepository;
     private final PricingRuleRepository pricingRuleRepository;
+    private final SeatPriceConfigRepository seatPriceConfigRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -40,6 +41,7 @@ public class DataSeeder implements CommandLineRunner {
         }
         seedFBItems();
         seedPricingRules();
+        seedSeatPriceConfigs();
         log.info("CineTik DataSeeder completed successfully!");
     }
 
@@ -263,6 +265,31 @@ public class DataSeeder implements CommandLineRunner {
 
             pricingRuleRepository.saveAll(List.of(r1, r2, r3));
             log.info("Seeded 3 Default Pricing Rules");
+        }
+    }
+
+    private void seedSeatPriceConfigs() {
+        if (seatPriceConfigRepository.count() == 0) {
+            SeatPriceConfig singleSeat = SeatPriceConfig.builder()
+                    .loaiGhe(SeatType.SINGLE)
+                    .tenLoaiGhe("Ghế Đơn")
+                    .giaGoc(new BigDecimal("80000"))
+                    .build();
+
+            SeatPriceConfig vipSeat = SeatPriceConfig.builder()
+                    .loaiGhe(SeatType.VIP)
+                    .tenLoaiGhe("Ghế VIP")
+                    .giaGoc(new BigDecimal("100000"))
+                    .build();
+
+            SeatPriceConfig coupleSeat = SeatPriceConfig.builder()
+                    .loaiGhe(SeatType.COUPLE)
+                    .tenLoaiGhe("Ghế Đôi")
+                    .giaGoc(new BigDecimal("150000"))
+                    .build();
+
+            seatPriceConfigRepository.saveAll(List.of(singleSeat, vipSeat, coupleSeat));
+            log.info("Seeded 3 Default Seat Base Price Configs (SINGLE: 80k, VIP: 100k, COUPLE: 150k)");
         }
     }
 }

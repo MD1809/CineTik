@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import com.cinetik.repository.SeatPriceConfigRepository;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -25,6 +27,7 @@ public class PricingEngineServiceImpl implements PricingEngineService {
 
     private final ObjectMapper objectMapper;
     private final PricingRuleRepository pricingRuleRepository;
+    private final SeatPriceConfigRepository seatPriceConfigRepository;
 
     @Override
     public CalculatePriceResponse calculateTicketPrice(Showtime showtime, List<Seat> seats) {
@@ -248,11 +251,15 @@ public class PricingEngineServiceImpl implements PricingEngineService {
     }
 
     private BigDecimal getDefaultPriceForSeatType(SeatType seatType) {
-        if (seatType == SeatType.VIP) {
-            return new BigDecimal("100000");
-        } else if (seatType == SeatType.COUPLE) {
-            return new BigDecimal("150000");
-        }
-        return new BigDecimal("80000"); // SINGLE
+        return seatPriceConfigRepository.findByLoaiGhe(seatType)
+                .map(SeatPriceConfig::getGiaGoc)
+                .orElseGet(() -> {
+                    if (seatType == SeatType.VIP) {
+                        return new BigDecimal("100000");
+                    } else if (seatType == SeatType.COUPLE) {
+                        return new BigDecimal("150000");
+                    }
+                    return new BigDecimal("80000"); // SINGLE
+                });
     }
 }
