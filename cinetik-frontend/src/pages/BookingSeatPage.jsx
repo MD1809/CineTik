@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { bookingService } from '../api/bookingService';
 import SeatMap from '../components/booking/SeatMap';
 import CountdownTimer from '../components/booking/CountdownTimer';
-import { ArrowLeft, Ticket, AlertCircle, Popcorn, Clock, MapPin, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Ticket, AlertCircle, Popcorn, Clock, MapPin } from 'lucide-react';
 
 export default function BookingSeatPage() {
   const { showtimeId } = useParams();
@@ -16,24 +16,44 @@ export default function BookingSeatPage() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Ref to track if navigating to checkout (so we don't release seat locks on unmount)
+  const isNavigatingToCheckoutRef = useRef(false);
+
+  // Key trigger to reset countdown timer back to 300s
+  const [timerKey, setTimerKey] = useState(0);
+
   // Timeout Modal state
   const [timeoutModalOpen, setTimeoutModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, [showtimeId]);
 
-  const fetchData = async () => {
+  // Polling 3s loop for seat statuses
+  useEffect(() => {
+    if (!showtimeId) return;
+
+    const intervalId = setInterval(() => {
+      fetchSeatsStatus(false);
+    }, 3000);
+
+    return () => {
+      clearInterval(intervalId);
+      // Best-effort release locks on leave (unless going to checkout)
+      if (!isNavigatingToCheckoutRef.current) {
+        bookingService.releaseMySeats(showtimeId).catch(() => {});
+      }
+    };
+  }, [showtimeId]);
+
+  const fetchInitialData = async () => {
     try {
       setLoading(true);
       setError(null);
       const stData = await bookingService.getShowtimeDetail(showtimeId);
       setShowtime(stData);
 
-      if (stData && stData.cinemaRoom) {
-        const seatsData = await bookingService.getRoomSeats(stData.cinemaRoom.id);
-        setSeats(seatsData || []);
-      }
+      await fetchSeatsStatus(true);
     } catch (err) {
       console.error('Error fetching showtime/seats:', err);
       setError('Không thể tải sơ đồ ghế cho suất chiếu này.');
@@ -42,15 +62,51 @@ export default function BookingSeatPage() {
     }
   };
 
-  const handleToggleSeat = (seat) => {
-    setSelectedSeats((prev) => {
-      const exists = prev.some((s) => s.id === seat.id);
-      if (exists) {
-        return prev.filter((s) => s.id !== seat.id);
-      } else {
-        return [...prev, seat];
+  const fetchSeatsStatus = async (isFirstLoad = false) => {
+    try {
+      const seatsStatusData = await bookingService.getSeatsStatus(showtimeId);
+      if (seatsStatusData) {
+        setSeats(seatsStatusData);
+
+        // Derive selected seats belonging to current user
+        const mySelected = seatsStatusData.filter((s) => s.trangThai === 'SELECTED_BY_ME');
+        setSelectedSeats(mySelected);
       }
-    });
+    } catch (err) {
+      console.error('Error polling seat statuses:', err);
+      if (isFirstLoad) {
+        setError('Không thể lấy danh sách trạng thái ghế.');
+      }
+    }
+  };
+
+  const handleToggleSeat = async (seat) => {
+    if (seat.trangThai === 'SOLD' || seat.trangThai === 'LOCKED_BY_OTHER') {
+      return;
+    }
+
+    const isAlreadySelected = seat.trangThai === 'SELECTED_BY_ME' || selectedSeats.some((s) => s.id === seat.id);
+
+    try {
+      if (isAlreadySelected) {
+        // Unlock / Deselect single seat
+        await bookingService.releaseSingleSeat(showtimeId, seat.id);
+        await fetchSeatsStatus();
+      } else {
+        // Lock / Select single seat
+        if (selectedSeats.length >= 8) {
+          alert('Bạn chỉ được chọn tối đa 8 ghế cho mỗi lượt đặt vé!');
+          return;
+        }
+
+        await bookingService.lockSingleSeat(showtimeId, seat.id);
+        await fetchSeatsStatus();
+      }
+    } catch (err) {
+      console.error('Error toggling seat lock:', err);
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật ghế. Vui lòng thử lại!');
+      fetchSeatsStatus();
+    }
   };
 
   const [priceCalculation, setPriceCalculation] = useState(null);
@@ -92,38 +148,33 @@ export default function BookingSeatPage() {
     setTimeoutModalOpen(true);
   };
 
-  const handleConfirmTimeout = () => {
+  const handleConfirmTimeout = async () => {
     setTimeoutModalOpen(false);
+    try {
+      await bookingService.releaseMySeats(showtimeId);
+    } catch (e) {}
     setSelectedSeats([]);
-    fetchData(); // Reload latest seat statuses
+    setTimerKey((prev) => prev + 1);
+    fetchSeatsStatus();
   };
 
-  const handleProceedToCheckout = async () => {
+  const handleProceedToCheckout = () => {
     if (selectedSeats.length === 0) {
       alert('Vui lòng chọn ít nhất 1 vị trí ghế để tiếp tục!');
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-      const seatIds = selectedSeats.map((s) => s.id);
-      // Lock seats in Redis 5 minutes
-      await bookingService.lockSeats(showtimeId, seatIds);
+    // Flag that we are proceeding to checkout so unmount won't release seats
+    isNavigatingToCheckoutRef.current = true;
 
-      // Navigate to checkout with booking state
-      navigate('/booking/checkout', {
-        state: {
-          showtime,
-          selectedSeats,
-          totalSeatPrice: calculateTotalPrice(),
-        },
-      });
-    } catch (err) {
-      console.error('Error locking seats:', err);
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi tạm giữ ghế. Vui lòng thử lại!');
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Navigate to checkout page
+    navigate('/booking/checkout', {
+      state: {
+        showtime,
+        selectedSeats,
+        totalSeatPrice: calculateTotalPrice(),
+      },
+    });
   };
 
   if (loading) {
@@ -175,13 +226,18 @@ export default function BookingSeatPage() {
           </div>
         </div>
 
-        {/* 5-Minute Redis Lock Timer */}
-        <CountdownTimer initialSeconds={300} onTimeout={handleTimeout} />
+        {/* 5-Minute Timer - Only active when at least 1 seat is selected */}
+        <CountdownTimer
+          key={timerKey}
+          resetKey={timerKey}
+          initialSeconds={300}
+          isActive={selectedSeats.length > 0}
+          onTimeout={handleTimeout}
+        />
       </div>
 
       {/* Main Seat Map Grid & Checkout Summary Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
         {/* Interactive Seat Map (Cols 2) */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col items-center">
           <SeatMap
@@ -266,10 +322,9 @@ export default function BookingSeatPage() {
             }`}
           >
             <Popcorn className="w-5 h-5" />
-            <span>{isSubmitting ? 'Đang tạm khóa ghế...' : 'Tiếp tục (Chọn Bắp Nước)'}</span>
+            <span>Tiếp tục (Chọn Bắp Nước)</span>
           </button>
         </div>
-
       </div>
 
       {/* Timeout Warning Modal */}

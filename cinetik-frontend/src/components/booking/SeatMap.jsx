@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, Heart, Star } from 'lucide-react';
+import { Heart, Star, Lock } from 'lucide-react';
 
 const SeatMap = ({ seats = [], selectedSeatIds = [], onToggleSeat, maxSeatsLimit = 8 }) => {
   // Group seats by Row (hang)
@@ -18,11 +18,15 @@ const SeatMap = ({ seats = [], selectedSeatIds = [], onToggleSeat, maxSeatsLimit
   });
 
   const getSeatStyle = (seat, isSelected) => {
-    if (seat.trangThai === 'SOLD' || seat.trangThai === 'LOCKED') {
-      return 'bg-slate-800/60 border-slate-800 text-slate-600 cursor-not-allowed';
+    if (seat.trangThai === 'SOLD') {
+      return 'bg-slate-800/80 border-slate-800 text-slate-600 cursor-not-allowed opacity-80';
     }
 
-    if (isSelected) {
+    if (seat.trangThai === 'LOCKED_BY_OTHER' || (seat.trangThai === 'LOCKED' && !isSelected)) {
+      return 'bg-amber-950/70 border-amber-600/80 text-amber-300 cursor-not-allowed shadow-inner opacity-90';
+    }
+
+    if (isSelected || seat.trangThai === 'SELECTED_BY_ME') {
       return 'bg-rose-600 border-rose-500 text-white font-bold shadow-lg shadow-rose-950/60 scale-105';
     }
 
@@ -37,12 +41,16 @@ const SeatMap = ({ seats = [], selectedSeatIds = [], onToggleSeat, maxSeatsLimit
     }
   };
 
+  const isSeatDisabled = (seat) => {
+    return seat.trangThai === 'SOLD' || seat.trangThai === 'LOCKED_BY_OTHER';
+  };
+
   const handleSeatClick = (seat) => {
-    if (seat.trangThai === 'SOLD' || seat.trangThai === 'LOCKED') {
+    if (isSeatDisabled(seat)) {
       return;
     }
 
-    const isAlreadySelected = selectedSeatIds.includes(seat.id);
+    const isAlreadySelected = selectedSeatIds.includes(seat.id) || seat.trangThai === 'SELECTED_BY_ME';
     if (!isAlreadySelected && selectedSeatIds.length >= maxSeatsLimit) {
       alert(`Bạn chỉ được chọn tối đa ${maxSeatsLimit} ghế cho mỗi lượt đặt hàng!`);
       return;
@@ -70,7 +78,8 @@ const SeatMap = ({ seats = [], selectedSeatIds = [], onToggleSeat, maxSeatsLimit
               {/* Seats in Row */}
               <div className="flex items-center space-x-2">
                 {rows[rowKey].map((seat) => {
-                  const isSelected = selectedSeatIds.includes(seat.id);
+                  const isSelected = selectedSeatIds.includes(seat.id) || seat.trangThai === 'SELECTED_BY_ME';
+                  const isLockedByOther = seat.trangThai === 'LOCKED_BY_OTHER';
                   const isCouple = seat.loaiGhe === 'COUPLE';
                   const label = `${seat.hang}${seat.cot}`;
 
@@ -78,13 +87,25 @@ const SeatMap = ({ seats = [], selectedSeatIds = [], onToggleSeat, maxSeatsLimit
                     <button
                       key={seat.id}
                       onClick={() => handleSeatClick(seat)}
-                      disabled={seat.trangThai === 'SOLD' || seat.trangThai === 'LOCKED'}
+                      disabled={isSeatDisabled(seat)}
                       className={`h-9 text-xs rounded-lg border transition-all flex items-center justify-center space-x-1 ${
                         isCouple ? 'w-20' : 'w-9'
                       } ${getSeatStyle(seat, isSelected)}`}
-                      title={`${label} - ${seat.loaiGhe}`}
+                      title={`${label} - ${seat.loaiGhe} ${
+                        seat.trangThai === 'SOLD'
+                          ? '(Đã bán)'
+                          : isLockedByOther
+                          ? '(Đang giữ chỗ)'
+                          : isSelected
+                          ? '(Đang chọn)'
+                          : '(Trống)'
+                      }`}
                     >
-                      {isCouple && <Heart className="w-3 h-3 text-purple-400 shrink-0" />}
+                      {isLockedByOther ? (
+                        <Lock className="w-3 h-3 text-amber-400 shrink-0" />
+                      ) : isCouple ? (
+                        <Heart className="w-3 h-3 text-purple-400 shrink-0" />
+                      ) : null}
                       <span>{label}</span>
                     </button>
                   );
@@ -125,8 +146,15 @@ const SeatMap = ({ seats = [], selectedSeatIds = [], onToggleSeat, maxSeatsLimit
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="w-5 h-5 rounded bg-slate-800/60 border border-slate-800"></div>
-          <span className="text-slate-500">Đã bán / Khóa</span>
+          <div className="w-5 h-5 rounded bg-amber-950/70 border border-amber-600/80 flex items-center justify-center text-amber-300">
+            <Lock className="w-3 h-3" />
+          </div>
+          <span className="text-amber-300 font-medium">Đang giữ chỗ</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <div className="w-5 h-5 rounded bg-slate-800/80 border border-slate-800"></div>
+          <span className="text-slate-500">Đã bán</span>
         </div>
       </div>
     </div>

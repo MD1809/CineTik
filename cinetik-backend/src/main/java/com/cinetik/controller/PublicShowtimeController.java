@@ -4,11 +4,15 @@ import com.cinetik.common.dto.ApiResponse;
 import com.cinetik.dto.CalculatePriceRequest;
 import com.cinetik.dto.CalculatePriceResponse;
 import com.cinetik.dto.ShowtimeResponse;
+import com.cinetik.dto.ShowtimeSeatStatusResponse;
+import com.cinetik.entity.User;
+import com.cinetik.repository.UserRepository;
 import com.cinetik.service.SeatLockService;
 import com.cinetik.service.ShowtimeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,6 +25,7 @@ public class PublicShowtimeController {
 
     private final ShowtimeService showtimeService;
     private final SeatLockService seatLockService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ShowtimeResponse>>> getPublicShowtimes(
@@ -40,6 +45,22 @@ public class PublicShowtimeController {
     public ResponseEntity<ApiResponse<List<Long>>> getLockedSeats(@PathVariable Long id) {
         List<Long> lockedSeatIds = seatLockService.getLockedSeatsForShowtime(id);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ghế đang bị giữ chỗ thành công", lockedSeatIds));
+    }
+
+    @GetMapping("/{id}/seats-status")
+    public ResponseEntity<ApiResponse<List<ShowtimeSeatStatusResponse>>> getSeatsStatus(
+            @PathVariable Long id,
+            Authentication authentication) {
+        Long userId = null;
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+            User user = userRepository.findByEmail(authentication.getName()).orElse(null);
+            if (user != null) {
+                userId = user.getId();
+            }
+        }
+
+        List<ShowtimeSeatStatusResponse> seatStatuses = seatLockService.getShowtimeSeatsStatus(id, userId);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách trạng thái ghế thành công", seatStatuses));
     }
 
     @PostMapping("/calculate-price")

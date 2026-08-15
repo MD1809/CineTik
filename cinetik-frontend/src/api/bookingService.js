@@ -11,6 +11,11 @@ export const bookingService = {
     return response.data.data;
   },
 
+  getSeatsStatus: async (showtimeId) => {
+    const response = await apiClient.get(`/public/showtimes/${showtimeId}/seats-status`);
+    return response.data.data;
+  },
+
   calculatePrice: async (showtimeId, seatIds) => {
     const response = await apiClient.post('/public/showtimes/calculate-price', { showtimeId, seatIds });
     return response.data.data;
@@ -18,6 +23,21 @@ export const bookingService = {
 
   lockSeats: async (showtimeId, seatIds) => {
     const response = await apiClient.post('/bookings/lock-seats', { showtimeId, seatIds });
+    return response.data.data;
+  },
+
+  lockSingleSeat: async (showtimeId, seatId) => {
+    const response = await apiClient.post('/bookings/lock-single-seat', { showtimeId, seatId });
+    return response.data.data;
+  },
+
+  releaseSingleSeat: async (showtimeId, seatId) => {
+    const response = await apiClient.post('/bookings/release-single-seat', { showtimeId, seatId });
+    return response.data.data;
+  },
+
+  releaseMySeats: async (showtimeId) => {
+    const response = await apiClient.post(`/bookings/release-my-seats?showtimeId=${showtimeId}`);
     return response.data.data;
   },
 
