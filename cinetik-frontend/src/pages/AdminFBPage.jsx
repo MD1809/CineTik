@@ -18,7 +18,7 @@ export default function AdminFBPage() {
     giaTien: 50000,
     hinhAnh: '',
     moTa: '',
-    trangThai: 'CON_HANG',
+    trangThai: 'AVAILABLE',
   });
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function AdminFBPage() {
       giaTien: 50000,
       hinhAnh: '',
       moTa: '',
-      trangThai: 'CON_HANG',
+      trangThai: 'AVAILABLE',
     });
     setModalOpen(true);
   };
@@ -58,7 +58,7 @@ export default function AdminFBPage() {
       giaTien: item.giaTien || 50000,
       hinhAnh: item.hinhAnh || '',
       moTa: item.moTa || '',
-      trangThai: item.trangThai || 'CON_HANG',
+      trangThai: item.trangThai || 'AVAILABLE',
     });
     setModalOpen(true);
   };
@@ -167,12 +167,12 @@ export default function AdminFBPage() {
                   <td className="p-4">
                     <span
                       className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                        item.trangThai === 'CON_HANG'
+                        item.trangThai === 'AVAILABLE'
                           ? 'bg-emerald-950/80 border-emerald-700 text-emerald-400'
                           : 'bg-rose-950/80 border-rose-800 text-rose-400'
                       }`}
                     >
-                      {item.trangThai === 'CON_HANG' ? 'Còn Hàng' : 'Hết Hàng'}
+                      {item.trangThai === 'AVAILABLE' ? 'Còn Hàng' : 'Hết Hàng'}
                     </span>
                   </td>
                   <td className="p-4 text-right space-x-2">
@@ -247,8 +247,8 @@ export default function AdminFBPage() {
                     onChange={(e) => setFormData({ ...formData, trangThai: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-rose-500"
                   >
-                    <option value="CON_HANG">Còn Hàng</option>
-                    <option value="HET_HANG">Hết Hàng</option>
+                    <option value="AVAILABLE">Còn Hàng</option>
+                    <option value="OUT_OF_STOCK">Hết Hàng</option>
                   </select>
                 </div>
               </div>
